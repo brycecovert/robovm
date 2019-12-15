@@ -25,7 +25,7 @@
 #define LOG_TAG "core.memory"
 
 #define MIN_HEAP_SIZE (4*1024*1024) // 4MB
-#define DEFAULT_INITIAL_HEAP_SIZE (16*1024*1024) // 16MB
+#define DEFAULT_INITIAL_HEAP_SIZE (64*1024*1024) // 16MB
 #define GLOBAL_REFS_INITIAL_SIZE 2048
 
 static Class* java_nio_DirectByteBuffer = NULL;
@@ -457,8 +457,13 @@ void gcHeapDump(Env* env) {
 jboolean initGC(Options* options) {
     GC_set_no_dls(1);
     GC_set_java_finalization(1);
+    fprintf(stderr, "Enabling incremental");
+    GC_enable_incremental();
+    fprintf(stderr, "Incremental enabled.");
+
     GC_INIT();
     GC_init_gcj_malloc(GC_GCJ_RESERVED_MARK_PROC_INDEX, NULL);
+    GC_set_free_space_divisor(2);
     if (options->maxHeapSize > 0) {
         GC_set_max_heap_size(options->maxHeapSize);
     }
